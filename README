@@ -1,0 +1,21 @@
++-----------------------------------------------------------------------------+
+|          Semtech SX1278 firmware for STM8S003                               |
++-----------------------------------------------------------------------------+
+
+This firmware currently supports the following Semtech LoRa product:
+	- SX1278
+		- LoRa modem (application default)
+
+1. Introduction
+-------------------------------------------------------------------------------
+
+The SX12xx drivers are included in a project made for the STM8S003 platform. Currently my development hardware is STM8S003 discovery kit (STM8SVLDISCOVERY) plus SFM-1L SX1278 LoRa module.	
+
+1. Version history
+-------------------------------------------------------------------------------
+
+<1.0.0> - This is original project from STM which SX1278 radio driver is not ported.
+
+<3.1.0> - Enable SPI hardware to improve RX/TX performance. 
+
+<3.2.0> - Increase baud rate to 128000.
