@@ -24,6 +24,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm8s_it.h"
 
+extern volatile uint32_t TickCounter;
+
 /** @addtogroup Template_Project
   * @{
   */
@@ -113,6 +115,11 @@ INTERRUPT_HANDLER(EXTI_PORTA_IRQHandler, 3)
   */
 }
 
+#if defined(MALIYU_DEBUG)
+extern uint32_t lora_rx_timing;
+extern uint32_t lora_tx_timing;
+extern uint8_t get_RFLRState(void);
+#endif
 /**
   * @brief External Interrupt PORTB Interrupt routine.
   * @param  None
@@ -123,6 +130,16 @@ INTERRUPT_HANDLER(EXTI_PORTB_IRQHandler, 4)
   /* In order to detect unexpected events during development,
      it is recommended to set a breakpoint on the following instruction.
   */
+#if defined(MALIYU_DEBUG)
+  if(get_RFLRState() == 2)
+  {
+    lora_rx_timing = TickCounter;
+  }
+  else if(get_RFLRState() == 6)
+  {
+    lora_tx_timing = TickCounter;
+  }
+#endif
 }
 
 /**
@@ -213,7 +230,6 @@ INTERRUPT_HANDLER(SPI_IRQHandler, 10)
   */
 }
 
-extern volatile uint32_t TickCounter;
 /**
   * @brief Timer1 Update/Overflow/Trigger/Break Interrupt routine.
   * @param  None

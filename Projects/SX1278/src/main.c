@@ -31,7 +31,7 @@
 #include "board.h"
 
 
-#define FIRMWARE_VERSION        3.2.0
+#define FIRMWARE_VERSION        3.3.0
     
 static tRadioDriver *p_radio = 0;
 static tTaskInstance *p_task = 0;

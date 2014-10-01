@@ -12,7 +12,7 @@
 #include <string.h>
 #if defined(STM8S003)
 #include "stm8s.h"
-#include "stm8s_spi.h"
+//#include "stm8s_spi.h"
 #elif defined(STM8L15X_MD)
 #include "stm8l15x.h"
 #include "stm8l15x_gpio.h"
@@ -47,10 +47,10 @@ static void SX1276LoRaSetLoRaOn( void );
 //static void SX1276LoRaSetSymbTimeout( uint16_t value );
 //static void SX1276LoRaSetPayloadLength( uint8_t value );
 //static void SX1276LoRaSetLowDatarateOptimize( bool enable );
-static void SX1276LoRaSetPAOutput( uint8_t outputPin );
-static void SX1276LoRaSetPa20dBm( bool enale );
-static void SX1276LoRaSetRFPower( int8_t power );
-static void SX1276LoRaSetNbTrigPeaks( uint8_t value );
+//static void SX1276LoRaSetPAOutput( uint8_t outputPin );
+//static void SX1276LoRaSetPa20dBm( bool enale );
+//static void SX1276LoRaSetRFPower( int8_t power );
+//static void SX1276LoRaSetNbTrigPeaks( uint8_t value );
 static void SX1276LoRaSetRFState( uint8_t state );
 static void SX1276LoRaGetRxPacket( void *buffer, uint16_t *size );
 static void SX1276LoRaSetTxPacket( const void *buffer, uint16_t size );
@@ -221,7 +221,7 @@ static tLoRaSettings LoRaSettings =
 {
     532923000,        // RFFrequency
     20,               // Power
-    1,                // SignalBw [0: 7.8kHz, 1: 10.4 kHz, 2: 15.6 kHz, 3: 20.8 kHz, 4: 31.2 kHz,
+    9,                // SignalBw [0: 7.8kHz, 1: 10.4 kHz, 2: 15.6 kHz, 3: 20.8 kHz, 4: 31.2 kHz,
                       // 5: 41.6 kHz, 6: 62.5 kHz, 7: 125 kHz, 8: 250 kHz, 9: 500 kHz, other: Reserved]
     10,                // SpreadingFactor [6: 64, 7: 128, 8: 256, 9: 512, 10: 1024, 11: 2048, 12: 4096  chips]
     2,                // ErrorCoding [1: 4/5, 2: 4/6, 3: 4/7, 4: 4/8]
@@ -473,7 +473,13 @@ static void SX1276InitIo( void )
   GPIO_Init(CTRL2_PORT, CTRL2_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
   
   /* Configure PB0 (Dio0) as input pull-up (LoRa software configurated) */
+#if defined(MALIYU_DEBUG)
+  GPIO_Init(DIO0_PORT, DIO0_PIN, GPIO_MODE_IN_PU_IT);
+  EXTI->CR1 |= (1<<2);
+  EXTI->CR2 |= (1<<2);
+#else
   GPIO_Init(DIO0_PORT, DIO0_PIN, GPIO_MODE_IN_PU_NO_IT);
+#endif
   /* Configure PB1 (Dio1) as input pull-up (LoRa software configurated) */
   GPIO_Init(DIO1_PORT, DIO1_PIN, GPIO_MODE_IN_PU_NO_IT);
   /* Configure PB2 (Dio2) as input pull-up (LoRa software configurated) */
@@ -504,8 +510,8 @@ static void SX1276InitIo( void )
   GPIO_Init(SPI_MISO_PORT, SPI_MISO_PIN, GPIO_MODE_IN_FL_NO_IT);
   CLK_PeripheralClockConfig(CLK_PERIPHERAL_SPI, ENABLE);
   GPIO_ExternalPullUpConfig(SPI_SCK_PORT, SPI_SCK_PIN, ENABLE);
-  GPIO_ExternalPullUpConfig(SPI_SCK_PORT, SPI_MOSI_PIN, ENABLE);
-  GPIO_ExternalPullUpConfig(SPI_SCK_PORT, SPI_MISO_PIN, ENABLE);
+  GPIO_ExternalPullUpConfig(SPI_MOSI_PORT, SPI_MOSI_PIN, ENABLE);
+  GPIO_ExternalPullUpConfig(SPI_MISO_PORT, SPI_MISO_PIN, ENABLE);
   GPIO_WriteHigh(SPI_NSS_PORT, SPI_NSS_PIN);
   SPI_Init(SPI_FIRSTBIT_MSB, SPI_BAUDRATEPRESCALER_2, SPI_MODE_MASTER, SPI_CLOCKPOLARITY_LOW, SPI_CLOCKPHASE_1EDGE, SPI_DATADIRECTION_2LINES_FULLDUPLEX, SPI_NSS_SOFT, 0x07);
   SPI_Cmd(ENABLE);
@@ -1302,14 +1308,14 @@ static void SX1276LoRaInit( void )
     SPI_write( REG_LR_MODEMCONFIG3, &(SX1276LR->RegModemConfig3), 1 );
 }*/
 
-static void SX1276LoRaSetPAOutput( uint8_t outputPin )
+/*static void SX1276LoRaSetPAOutput( uint8_t outputPin )
 {
     SPI_read( REG_LR_PACONFIG, &(SX1276LR->RegPaConfig), 1 );
     SX1276LR->RegPaConfig = (SX1276LR->RegPaConfig & RFLR_PACONFIG_PASELECT_MASK ) | outputPin;
     SPI_write( REG_LR_PACONFIG, &(SX1276LR->RegPaConfig), 1 );
-}
+}*/
 
-static void SX1276LoRaSetPa20dBm( bool enale )
+/*static void SX1276LoRaSetPa20dBm( bool enale )
 {
     SPI_read( REG_LR_PADAC, &(SX1276LR->RegPaDac), 1 );
     SPI_read( REG_LR_PACONFIG, &(SX1276LR->RegPaConfig), 1 );
@@ -1326,9 +1332,9 @@ static void SX1276LoRaSetPa20dBm( bool enale )
         SX1276LR->RegPaDac = 0x84;
     }
     SPI_write( REG_LR_PADAC, &(SX1276LR->RegPaDac), 1 );
-}
+}*/
 
-static void SX1276LoRaSetRFPower( int8_t power )
+/*static void SX1276LoRaSetRFPower( int8_t power )
 {
     SPI_read( REG_LR_PACONFIG, &(SX1276LR->RegPaConfig), 1 );
     SPI_read( REG_LR_PADAC, &(SX1276LR->RegPaDac), 1 );
@@ -1377,14 +1383,14 @@ static void SX1276LoRaSetRFPower( int8_t power )
     }
     SPI_write( REG_LR_PACONFIG, &(SX1276LR->RegPaConfig), 1 );
     LoRaSettings.Power = power;
-}
+}*/
 
-static void SX1276LoRaSetNbTrigPeaks( uint8_t value )
+/*static void SX1276LoRaSetNbTrigPeaks( uint8_t value )
 {
     SPI_read( 0x31, &(SX1276LR->RegTestReserved31), 1 );
     SX1276LR->RegTestReserved31 = ( SX1276LR->RegTestReserved31 & 0xF8 ) | value;
     SPI_write( 0x31, &(SX1276LR->RegTestReserved31), 1 );
-}
+}*/
 
 static void SX1276WriteRxTx( uint8_t txEnable )
 {
@@ -1399,3 +1405,10 @@ static void SX1276WriteRxTx( uint8_t txEnable )
         GPIO_WriteLow(CTRL2_PORT, CTRL2_PIN);
     }
 }
+
+#if defined(MALIYU_DEBUG)
+uint8_t get_RFLRState(void)
+{
+  return RFLRState;
+}
+#endif

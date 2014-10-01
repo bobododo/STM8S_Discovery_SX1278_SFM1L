@@ -19,3 +19,8 @@ The SX12xx drivers are included in a project made for the STM8S003 platform. Cur
 <3.1.0> - Enable SPI hardware to improve RX/TX performance. 
 
 <3.2.0> - Increase baud rate to 128000.
+
+<3.3.0> 
+- Add in some debugging code which can be disabled by commenting MALIYU_DEBUG in project option->Preprocessor.
+- Change LoRa signal bandwidth from 10.4KHz to 500KHz to improve the response time.
+- Disable some functions to save code space.

@@ -27,13 +27,22 @@ typedef enum
   PerDone//
 }PER_PHASE;
 
+#if defined(MALIYU_DEBUG)
+static uint8_t gb_RxData[128];                                         //Receive data buffer
+#else
 static uint8_t gb_RxData[256];                                         //Receive data buffer
+#endif
 static uint16_t packageSize = 0;
-static uint8_t PER_phase = PerStart;
-static uint8_t RxPacketCout;
+//static uint8_t PER_phase = PerStart;
+//static uint8_t RxPacketCout;
 static tTaskInstance taskInstance;
 static uint8_t total_input_char_number = 0;
 static uint8_t input_buffer[INPUT_BUFFER_SIZE];
+#if defined(MALIYU_DEBUG)
+extern volatile uint32_t TickCounter;
+uint32_t lora_rx_timing = 0;
+uint32_t lora_tx_timing = 0;
+#endif
 
 tTaskInstance* task_init(void)
 {
