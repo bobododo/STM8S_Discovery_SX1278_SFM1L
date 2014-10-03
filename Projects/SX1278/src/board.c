@@ -21,13 +21,18 @@
 #include "stm8l15x_usart.h"
 #endif
 
-void board_init(void)
+#define ISUNSIGNED(a) (a>0 && ~a>0)
+
+void Board_Init(void)
 {
 #if defined(STM8S003)
-  /*Clock configuration fmaster = 16MHz*/
-  CLK_SYSCLKConfig(CLK_PRESCALER_HSIDIV1);
-  CLK_SYSCLKConfig(CLK_PRESCALER_CPUDIV1);
+  /* fmaster = 16MHz internal clock*/
+  /* fCPU = fmaster */
+  //CLK_SYSCLKConfig(CLK_PRESCALER_HSIDIV1);
+  //CLK_SYSCLKConfig(CLK_PRESCALER_CPUDIV1);
+  CLK->CKDIVR = 0x00;
   
+#if 0
   /* f_ck_cnt = 16Mhz/16 = 1MHz */
   /* count up mode */
   /* 1000/1MHz = 1ms */
@@ -36,9 +41,11 @@ void board_init(void)
   TIM1_ARRPreloadConfig(DISABLE);
   TIM1_ITConfig(TIM1_IT_UPDATE, ENABLE);
   TIM1_Cmd(ENABLE);
+#endif
   
   /* UART init */    
-  CLK_PeripheralClockConfig(CLK_PERIPHERAL_UART1, ENABLE);
+  //CLK_PeripheralClockConfig(CLK_PERIPHERAL_UART1, ENABLE);
+  CLK->PCKENR1 |= (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_UART1 & (uint8_t)0x0F));
   GPIO_ExternalPullUpConfig(GPIOD, GPIO_PIN_5, ENABLE);
   GPIO_ExternalPullUpConfig(GPIOD, GPIO_PIN_6, ENABLE);
   UART1->CR2 = 0x24;
@@ -47,11 +54,11 @@ void board_init(void)
   UART1->CR3 = 0;   
   // baud rate 115200
   // Actual baud rate may be 125000. So please set it as 128000 in Windows
-  UART1->BRR1 = 0x08; 
-  UART1->BRR2 = 0x0B;
+  //UART1->BRR1 = 0x08; 
+  //UART1->BRR2 = 0x0B;
   // baud rate 9600
-  //UART1->BRR1 = 0x68; 
-  //UART1->BRR2 = 0x03;
+  UART1->BRR1 = 0x68; 
+  UART1->BRR2 = 0x03;
   
   /* Configure PD0 (LED1) as output push-pull low (led switched on) */
   GPIO_Init(GPIOD, GPIO_PIN_0, GPIO_MODE_OUT_PP_HIGH_FAST);
@@ -95,7 +102,12 @@ void LoRaRX_Indicate(void)
 
 void Uart_Prints(uint8_t *p_data, uint16_t length)
 {
-  if(length <= 0)
+  if(!ISUNSIGNED(length))
+  {
+    return;
+  }
+  
+  if(p_data == 0)
   {
     return;
   }
@@ -115,5 +127,48 @@ void Uart_Prints(uint8_t *p_data, uint16_t length)
     while((UART1->SR & UART1_FLAG_TC) == RESET);
     UART1->CR2 &= ~(1<<3);
 #endif
+  }
+}
+
+void EEPROM_Write(uint16_t address, uint8_t *p_data, uint16_t len)
+{
+  if(!(ISUNSIGNED(len)))
+  {
+    return;
+  }
+  
+  if(p_data == 0)
+  {
+    return;
+  }
+  
+  //FLASH_Unlock(FLASH_MEMTYPE_DATA);
+  /* Warning: keys are reversed on data memory !!! */
+  FLASH->DUKR = 0xAE; 
+  FLASH->DUKR = 0x56;
+  //FLASH_ProgramByte(FIRMWARE_VERSION_ADDRESS, 0x55);
+  while(len--)
+  {
+    *(PointerAttr uint8_t*)(address++) = (*p_data++);
+  }
+  //FLASH_Lock(FLASH_MEMTYPE_DATA);
+  FLASH->IAPSR &= (uint8_t)(~(1<<3));
+}
+
+void EEPROM_Read(uint16_t address, uint8_t *p_data, uint16_t len)
+{
+  if(!(ISUNSIGNED(len)))
+  {
+    return;
+  }
+  
+  if(p_data == 0)
+  {
+    return;
+  }
+  
+  while(len--)
+  {
+    (*p_data++) = *(PointerAttr uint8_t*)(address++);
   }
 }

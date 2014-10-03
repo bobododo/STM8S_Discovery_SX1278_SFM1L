@@ -12,7 +12,19 @@
 #ifndef _BOARD_H_
 #define _BOARD_H_
 
-void board_init(void);
+#define REMOTE_MAX_NUMBER       10
+#define FIRMWARE_VERSION_ADDRESS        0x4000
+#define DEVICE_PARAMETERS_ADDRESS       (FIRMWARE_VERSION_ADDRESS + 5)
+
+typedef struct t_DeviceParameters
+{
+  unsigned char hostID;
+  unsigned char remoteID[REMOTE_MAX_NUMBER];
+}s_DeviceParameters;
+
+void Board_Init(void);
 void LoRaRX_Indicate(void);
 void Uart_Prints(unsigned char *p_data, int length);
+void EEPROM_Write(unsigned short address, unsigned char *p_data, unsigned short len);
+void EEPROM_Read(unsigned short address, unsigned char *p_data, unsigned short len);
 #endif /* _BOARD_H_ */

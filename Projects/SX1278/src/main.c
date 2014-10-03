@@ -24,6 +24,7 @@
 #if defined(STM8L15X_MD)
 #include "stm8l15x.h"
 #elif defined(STM8S003)
+#include <string.h>
 #include "stm8s.h"
 #endif
 #include "task.h"
@@ -31,18 +32,42 @@
 #include "board.h"
 
 
-#define FIRMWARE_VERSION        3.3.0
+#define FIRMWARE_VERSION        "3.4.0"
     
 static tRadioDriver *p_radio = 0;
 static tTaskInstance *p_task = 0;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
+static void update_fwVersion(void)
+{
+  uint8_t version[6];
+  
+  EEPROM_Read(FIRMWARE_VERSION_ADDRESS, version, 6);
+  if(strcmp(version, FIRMWARE_VERSION) != 0)
+  {
+    EEPROM_Write(FIRMWARE_VERSION_ADDRESS, FIRMWARE_VERSION, strlen(FIRMWARE_VERSION));
+  }
+  
+#if 0
+  {
+    uint8_t i;
+    
+    s_DeviceParameters para;
+    para.hostID = 1;
+    for(i=0;i<REMOTE_MAX_NUMBER;i++)
+    {
+      para.remoteID[i] = i+1;
+    }
+    EEPROM_Write(DEVICE_PARAMETERS_ADDRESS, (uint8_t *)(&para), sizeof(struct t_DeviceParameters));
+  }
+#endif
+}
 
 void main(void)
 {   
   disableInterrupts();
   
-  board_init();
+  Board_Init();
   
   p_radio = RadioDriverInit( );  
   p_radio->Init( );
@@ -52,6 +77,8 @@ void main(void)
   p_task->p_device1 = p_radio;
   
   enableInterrupts();
+  
+  update_fwVersion();
   
   /* Infinite loop */
   while (1)

@@ -24,3 +24,8 @@ The SX12xx drivers are included in a project made for the STM8S003 platform. Cur
 - Add in some debugging code which can be disabled by commenting MALIYU_DEBUG in project option->Preprocessor.
 - Change LoRa signal bandwidth from 10.4KHz to 500KHz to improve the response time.
 - Disable some functions to save code space.
+
+<3.4.0>
+- Store firmware version into eeprom. It can automatically store it as long as the different version is detected.
+- Implement host ID & remote ID so that only predefined host ID & remote ID are allowed. 
+- Add command at+on=[host ID],[remote ID] and at+off=[host ID],[remote ID]. At here, host ID and remote ID must be two bytes. Another word, the firmware can support max 99 host and each host can support total 99 remote controllers.
