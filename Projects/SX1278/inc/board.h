@@ -13,8 +13,9 @@
 #define _BOARD_H_
 
 #define REMOTE_MAX_NUMBER       10
+#define VERSION_MAX_SIZE        5
 #define FIRMWARE_VERSION_ADDRESS        0x4000
-#define DEVICE_PARAMETERS_ADDRESS       (FIRMWARE_VERSION_ADDRESS + 5)
+#define DEVICE_PARAMETERS_ADDRESS       (FIRMWARE_VERSION_ADDRESS + VERSION_MAX_SIZE)
 
 typedef struct t_DeviceParameters
 {

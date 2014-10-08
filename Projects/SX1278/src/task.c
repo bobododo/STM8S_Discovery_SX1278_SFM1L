@@ -20,7 +20,7 @@
 #include "board.h"
 
 #define INPUT_BUFFER_SIZE 20
-#define CMD_BODY_MAX_SIZE 10
+#define CMD_BODY_MAX_SIZE 12
 #define CMD_OPTIONS_MAX_SIZE 6
 
 #define ISUNSIGNED(a) (a>0 && ~a>0)
@@ -99,8 +99,16 @@ static void cmd_decoder(uint8_t *p_cmd, uint8_t cmdLen)
         if(i <= CMD_BODY_MAX_SIZE)
         {
           memcpy(cmdBody, p_cmd, i);
-          memcpy(cmdOptions, p_cmd+i+1, CMD_OPTIONS_MAX_SIZE);
-          cmdOptions[CMD_OPTIONS_MAX_SIZE-1] = '\0';
+          if(CMD_OPTIONS_MAX_SIZE < cmdLen-i-1)
+          {
+            memcpy(cmdOptions, p_cmd+i+1, CMD_OPTIONS_MAX_SIZE);
+            cmdOptions[CMD_OPTIONS_MAX_SIZE-1] = '\0';
+          }
+          else
+          {
+            memcpy(cmdOptions, p_cmd+i+1, cmdLen-i-1);
+            //cmdOptions[cmdLen-i-1] = '\0';
+          }
           cmd_type = CMD_VALID;
         }
         break;
@@ -141,6 +149,21 @@ static void cmd_decoder(uint8_t *p_cmd, uint8_t cmdLen)
           }
         }
       }
+      else if(strcmp(cmdBody, "at+version") == 0)
+      {
+        /* Only retreive firmware version                       */
+        /* User could not set firmware version by this command  */
+        /* at+version=?                                         */
+        if(cmdOptions[0] == '?')
+        {
+          uint8_t version[VERSION_MAX_SIZE+1];
+          
+          memset(version, 0, VERSION_MAX_SIZE+1);
+          EEPROM_Read(FIRMWARE_VERSION_ADDRESS, version, VERSION_MAX_SIZE);
+          version[VERSION_MAX_SIZE]= '\r';
+          Uart_Prints(version, VERSION_MAX_SIZE+1);
+        }
+      }
     }
   }
 }
@@ -174,6 +197,8 @@ void task_exec(tTaskInstance *task)
     
     /* No transmit UART RX data through RF */  
     //radio->SetTxPacket(input_buffer, total_input_char_number);
+    
+    cmd_decoder(input_buffer, total_input_char_number);
     
     discard_input_buffer();
   }

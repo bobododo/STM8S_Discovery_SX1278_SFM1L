@@ -32,7 +32,7 @@
 #include "board.h"
 
 
-#define FIRMWARE_VERSION        "3.4.0"
+#define FIRMWARE_VERSION        "3.4.1"
     
 static tRadioDriver *p_radio = 0;
 static tTaskInstance *p_task = 0;
@@ -40,12 +40,13 @@ static tTaskInstance *p_task = 0;
 /* Private functions ---------------------------------------------------------*/
 static void update_fwVersion(void)
 {
-  uint8_t version[6];
+  uint8_t version[VERSION_MAX_SIZE+1];
   
-  EEPROM_Read(FIRMWARE_VERSION_ADDRESS, version, 6);
+  memset(version, 0, VERSION_MAX_SIZE+1);
+  EEPROM_Read(FIRMWARE_VERSION_ADDRESS, version, VERSION_MAX_SIZE);
   if(strcmp(version, FIRMWARE_VERSION) != 0)
   {
-    EEPROM_Write(FIRMWARE_VERSION_ADDRESS, FIRMWARE_VERSION, strlen(FIRMWARE_VERSION));
+    EEPROM_Write(FIRMWARE_VERSION_ADDRESS, FIRMWARE_VERSION, VERSION_MAX_SIZE);
   }
   
 #if 0
@@ -108,5 +109,6 @@ void assert_failed(u8* file, u32 line)
   }
 }
 #endif
+
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
