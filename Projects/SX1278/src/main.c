@@ -30,39 +30,11 @@
 #include "task.h"
 #include "sx1276.h"
 #include "board.h"
-
-
-#define FIRMWARE_VERSION        "3.4.1"
     
 static tRadioDriver *p_radio = 0;
 static tTaskInstance *p_task = 0;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
-static void update_fwVersion(void)
-{
-  uint8_t version[VERSION_MAX_SIZE+1];
-  
-  memset(version, 0, VERSION_MAX_SIZE+1);
-  EEPROM_Read(FIRMWARE_VERSION_ADDRESS, version, VERSION_MAX_SIZE);
-  if(strcmp(version, FIRMWARE_VERSION) != 0)
-  {
-    EEPROM_Write(FIRMWARE_VERSION_ADDRESS, FIRMWARE_VERSION, VERSION_MAX_SIZE);
-  }
-  
-#if 0
-  {
-    uint8_t i;
-    
-    s_DeviceParameters para;
-    para.hostID = 1;
-    for(i=0;i<REMOTE_MAX_NUMBER;i++)
-    {
-      para.remoteID[i] = i+1;
-    }
-    EEPROM_Write(DEVICE_PARAMETERS_ADDRESS, (uint8_t *)(&para), sizeof(struct t_DeviceParameters));
-  }
-#endif
-}
 
 void main(void)
 {   
@@ -79,7 +51,6 @@ void main(void)
   
   enableInterrupts();
   
-  update_fwVersion();
   
   /* Infinite loop */
   while (1)
@@ -109,6 +80,7 @@ void assert_failed(u8* file, u32 line)
   }
 }
 #endif
+
 
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/

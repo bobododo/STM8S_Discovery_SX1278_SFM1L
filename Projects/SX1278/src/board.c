@@ -61,8 +61,8 @@ void Board_Init(void)
   UART1->BRR2 = 0x03;
   
   /* Configure PD0 (LED1) as output push-pull low (led switched on) */
-  GPIO_Init(GPIOD, GPIO_PIN_0, GPIO_MODE_OUT_PP_HIGH_FAST);
-  //GPIO_Init(GPIOD, GPIO_PIN_0, GPIO_MODE_OUT_PP_LOW_FAST);
+  //GPIO_Init(GPIOD, GPIO_PIN_0, GPIO_MODE_OUT_PP_HIGH_FAST);
+  GPIO_Init(GPIOD, GPIO_PIN_0, GPIO_MODE_OUT_PP_LOW_FAST);
 #elif defined(STM8L15X_MD)
   /* Internal clock */
   CLK_SYSCLKSourceConfig(CLK_SYSCLKSource_HSI);

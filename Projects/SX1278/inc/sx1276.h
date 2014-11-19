@@ -528,8 +528,6 @@ typedef enum
 
 void delay_ms(uint16_t ms);
 tRadioDriver* RadioDriverInit( void );
-//uint8_t SPI_read(uint8_t addr);
-//void SPI_write(uint8_t addr, uint8_t data);
 void SPI_read(uint8_t addr, uint8_t *p_data, uint8_t length);
 void SPI_write(uint8_t addr, uint8_t *p_data, uint8_t length);
 #endif /* _SX1276_H_ */

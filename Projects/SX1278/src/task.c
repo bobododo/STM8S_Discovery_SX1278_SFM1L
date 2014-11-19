@@ -46,7 +46,10 @@ static tTaskInstance taskInstance;
 static uint8_t total_input_char_number = 0;
 static uint8_t input_buffer[INPUT_BUFFER_SIZE];
 static s_DeviceParameters devicePara; 
-
+static uint8_t jobFlag = 0;
+static uint8_t gb_RxData[RF_BUFFER_SIZE];   
+static uint16_t packageSize = 0;
+  
 tTaskInstance* task_init(void)
 {
   uint8_t i;
@@ -60,7 +63,12 @@ tTaskInstance* task_init(void)
   taskInstance.p_data = input_buffer;
   taskInstance.p_dataLen = &total_input_char_number;
   
-  EEPROM_Read(DEVICE_PARAMETERS_ADDRESS, (unsigned char *)(&devicePara), sizeof(struct t_DeviceParameters));
+  //EEPROM_Read(DEVICE_PARAMETERS_ADDRESS, (unsigned char *)(&devicePara), sizeof(struct t_DeviceParameters));
+  devicePara.hostID = 1;
+  for(i=0;i<REMOTE_MAX_NUMBER;i++)
+  {
+    devicePara.remoteID[i] = i+1;
+  }
   
   return (&taskInstance);
 }
@@ -124,7 +132,7 @@ static void cmd_decoder(uint8_t *p_cmd, uint8_t cmdLen)
         /* at+on=[hostID],[remoteID] */
         /* at+off=[hostID],[remoteID] */
         /* Only predefined host & remote are allowed */
-        if((strlen(cmdOptions) == 5) && (cmdOptions[2] == ','))
+        if(cmdOptions[2] == ',')
         {
           if(cmdOptions[0] >= 0x30 && cmdOptions[0] <= 0x39 && \
              cmdOptions[1] >= 0x30 && cmdOptions[1] <= 0x39 && \
@@ -140,8 +148,7 @@ static void cmd_decoder(uint8_t *p_cmd, uint8_t cmdLen)
               {
                 if(devicePara.remoteID[i] == remoteID)
                 {
-                  tRadioDriver *radio = taskInstance.p_device1; 
-                  radio->SetTxPacket((void *)p_cmd, cmdLen);
+                  jobFlag = 1;
                   break;
                 }
               }
@@ -158,8 +165,9 @@ static void cmd_decoder(uint8_t *p_cmd, uint8_t cmdLen)
         {
           uint8_t version[VERSION_MAX_SIZE+1];
           
-          memset(version, 0, VERSION_MAX_SIZE+1);
-          EEPROM_Read(FIRMWARE_VERSION_ADDRESS, version, VERSION_MAX_SIZE);
+          //memset(version, 0, VERSION_MAX_SIZE+1);
+          //EEPROM_Read(FIRMWARE_VERSION_ADDRESS, version, VERSION_MAX_SIZE);
+          memcpy(version, FIRMWARE_VERSION, VERSION_MAX_SIZE);
           version[VERSION_MAX_SIZE]= '\r';
           Uart_Prints(version, VERSION_MAX_SIZE+1);
         }
@@ -171,8 +179,8 @@ static void cmd_decoder(uint8_t *p_cmd, uint8_t cmdLen)
 void task_exec(tTaskInstance *task)
 {
   /* Receive data buffer */
-  uint8_t gb_RxData[RF_BUFFER_SIZE];   
-  uint16_t packageSize = 0;
+  //uint8_t gb_RxData[RF_BUFFER_SIZE];   
+  //uint16_t packageSize = 0;
   tRadioDriver *radio; 
   
   if(task == 0)
@@ -221,6 +229,13 @@ void task_exec(tTaskInstance *task)
         
         //radio->SetTxPacket((void *)gb_RxData, packageSize);
         cmd_decoder(gb_RxData, packageSize);
+        
+        if(1 == jobFlag)
+        {
+          radio->SetTxPacket(gb_RxData, packageSize);
+          
+          jobFlag = 0;
+        }
         
         memset(gb_RxData, 0, RF_BUFFER_SIZE);
         break;

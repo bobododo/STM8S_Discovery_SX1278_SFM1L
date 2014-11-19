@@ -31,3 +31,10 @@ The SX12xx drivers are included in a project made for the STM8S003 platform. Cur
 - Add command at+on=[host ID],[remote ID] and at+off=[host ID],[remote ID]. At here, host ID and remote ID must be two bytes. Another word, the firmware can support max 99 host and each host can support total 99 remote controllers.
 
 <3.4.1> - Add command "at+version=?" to retreive firmware version through UART.
+
+<3.4.2>
+- Shift FIRMWARE_VERSION from main.c to task.h
+- Add <Misc> folder & IO Mapping List.xls
+- Set LD1 of STM8S ValueLine Discovery on at the begining.
+- Remove firmware version and device parameter from EEPROM. Now they are hardcode in program. This is due to STM8S EEPROM behaviour.
+- 
